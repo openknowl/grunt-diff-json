@@ -60,7 +60,7 @@ var diffJSON = function (template, subject) {
 };
 
 module.exports = function (grunt) {
-	grunt.registerMultiTask('diff_json', 'Grunt task that compares json files.', function () {
+	grunt.registerMultiTask('diffJSON', 'Grunt task that compares json files.', function () {
 		// Merge task-specific and/or target-specific options with these defaults.
 		var options = this.options({
 			/**
