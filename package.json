@@ -1,0 +1,42 @@
+{
+  "name": "grunt-diff-json",
+  "description": "Grunt task that compares two json files.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/openknowl/grunt-diff-json",
+  "author": {
+    "name": "openknowl",
+    "email": "cio@openknowl.com",
+    "url": "www.openknowl.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openknowl/grunt-diff-json.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openknowl/grunt-diff-json/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/openknowl/grunt-diff-json/blob/master/LICENSE-MIT"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.9.2",
+    "grunt-contrib-clean": "^0.5.0",
+    "grunt-contrib-nodeunit": "^0.3.3",
+    "grunt": "~0.4.5"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.5"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
