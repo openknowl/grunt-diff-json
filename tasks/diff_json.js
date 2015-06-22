@@ -23,30 +23,32 @@ var diffJSON = function (template, subject) {
 
 	// Reformat this data.
 	differences.forEach(function (diff) {
+		var path = '[' + diff.path.join('.') + ']';
+
+		if (diff.kind === 'A') {
+			path += '[' + diff.index + ']';
+			diff = diff.item;
+		}
+
 		var kind = kindDict[diff.kind];
 		// Override type for convenience.
 		if (kind === 'edited' && (typeof diff.rhs) !== (typeof diff.lhs)) {
 			kind = 'typeMismatch';
 		}
 		
-		var path = '[' + diff.path.join('.') + ']';
-		var msg;
-		
 		// Format string.
-		switch (kind) {
-			case 'typeMismatch': 
-				msg = 'Mismatching type: ' + '"' + (typeof diff.lhs) + '" -> "' + (typeof diff.rhs) + '"';
-				break;
-			case 'edited':
-				msg = JSON.stringify(diff.lhs) + ' -> ' + JSON.stringify(diff.rhs);
-				break;
-			case 'obsolete':
-				msg = 'Obsolete: ' + '(current value: ' + JSON.stringify(diff.rhs) + ')';
-				break;
-			case 'missing':
-				msg = 'Missing: ' + '(example value : ' + JSON.stringify(diff.lhs) + ')';
-				break;
-		}
+		var msg = (function () {
+			switch (kind) {
+				case 'typeMismatch': 
+					return 'Mismatching type: ' + '"' + (typeof diff.lhs) + '" -> "' + (typeof diff.rhs) + '"';
+				case 'edited':
+					return JSON.stringify(diff.lhs) + ' -> ' + JSON.stringify(diff.rhs);
+				case 'obsolete':
+					return 'Obsolete: ' + '(current value: ' + JSON.stringify(diff.rhs) + ')';
+				case 'missing':
+					return 'Missing: ' + '(example value : ' + JSON.stringify(diff.lhs) + ')';
+			}
+		})();
 		
 		// Aggregate to report array.
 		report.push({
