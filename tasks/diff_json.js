@@ -23,28 +23,28 @@ var diffJSON = function (template, subject) {
 
 	// Reformat this data.
 	differences.forEach(function (diff) {
-		// Override type for convenience.
-		if ((typeof diff.rhs) !== (typeof diff.lhs)) {
-			diff.kind = 'T';
-		}
 		var kind = kindDict[diff.kind];
+		// Override type for convenience.
+		if (kind === 'edited' && (typeof diff.rhs) !== (typeof diff.lhs)) {
+			kind = 'typeMismatch';
+		}
 		
 		var path = '[' + diff.path.join('.') + ']';
 		var msg;
 		
 		// Format string.
-		switch (diff.kind) {
+		switch (kind) {
 			case 'typeMismatch': 
 				msg = 'Mismatching type: ' + '"' + (typeof diff.lhs) + '" -> "' + (typeof diff.rhs) + '"';
 				break;
 			case 'edited':
-				msg = '"' + diff.lhs + '" -> "' + diff.rhs + '"';
+				msg = JSON.stringify(diff.lhs) + ' -> ' + JSON.stringify(diff.rhs);
 				break;
 			case 'obsolete':
-				msg = 'Obsolete: ' + '(current value: "' + diff.rhs + '")';
+				msg = 'Obsolete: ' + '(current value: ' + JSON.stringify(diff.rhs) + ')';
 				break;
 			case 'missing':
-				msg = 'Missing: ' + '(example value : "' + diff[i].lhs + '")';
+				msg = 'Missing: ' + '(example value : ' + JSON.stringify(diff.lhs) + ')';
 				break;
 		}
 		
@@ -100,7 +100,7 @@ module.exports = function (grunt) {
 
 			var template = safeReadJSON(group.dest);
 
-			var src = group.src.filter(function (filepath) {
+			group.src.filter(function (filepath) {
 				// Warn on and remove invalid source files (if nonull was set).
 				if (!grunt.file.exists(filepath)) {
 					grunt.log.warn('Source file "' + filepath + '" not found.');
@@ -121,11 +121,11 @@ module.exports = function (grunt) {
 					var str = line.path + ' ' + line.msg;
 					switch (options.report[line.kind]) {
 						case 'fatal':
-							grunt.log.error(str).error('Fatal error. Aborting...');
+							grunt.log.error(str).error('Fatal error. Aborting test...');
 							grunt.fail.fatal('Diff test failed.');
 							break;
 						case 'error':
-							grunt.log.error(str).error('Error. Aborting...');
+							grunt.log.error(str).error('Aborting test...');
 							grunt.fail.warn('Diff test failed.');
 							break;
 						case 'warn':
@@ -143,7 +143,7 @@ module.exports = function (grunt) {
 			});
 		});
 
-		grunt.log.header('Diff test of ' + this.target + ' succeeded with ' + warnings + ' warnings.');
+		grunt.log.header('Diff test of "' + this.target + '" succeeded with ' + warnings + ' warning(s).');
 	});
 
 };
