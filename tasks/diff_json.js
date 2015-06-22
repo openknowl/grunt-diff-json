@@ -10,9 +10,16 @@
 
 var deepDiff = require('deep-diff');
 
-var diffJson = function (dest, src) {
-	var differences = deepDiff(src, dest);
+var diffJSON = function (template, subject) {
+	var differences = deepDiff(template, subject);
 	var report = [];
+
+	var kindDict = {
+		T: 'typeMismatch',
+		E: 'edited',
+		N: 'obsolete',
+		D: 'missing'
+	};
 
 	// Reformat this data.
 	differences.forEach(function (diff) {
@@ -20,29 +27,30 @@ var diffJson = function (dest, src) {
 		if ((typeof diff.rhs) !== (typeof diff.lhs)) {
 			diff.kind = 'T';
 		}
+		var kind = kindDict[diff.kind];
 		
 		var path = '[' + diff.path.join('.') + ']';
 		var msg;
 		
 		// Format string.
 		switch (diff.kind) {
-			case 'E':
-				msg = '"' + diff.lhs + '" -> "' + diff.rhs + '"';
-				break;
-			case 'T': 
+			case 'typeMismatch': 
 				msg = 'Mismatching type: ' + '"' + (typeof diff.lhs) + '" -> "' + (typeof diff.rhs) + '"';
 				break;
-			case 'N':
+			case 'edited':
+				msg = '"' + diff.lhs + '" -> "' + diff.rhs + '"';
+				break;
+			case 'obsolete':
 				msg = 'Obsolete: ' + '(current value: "' + diff.rhs + '")';
 				break;
-			case 'D':
+			case 'missing':
 				msg = 'Missing: ' + '(example value : "' + diff[i].lhs + '")';
 				break;
 		}
 		
 		// Aggregate to report array.
 		report.push({
-			kind: diff.kind,
+			kind: kind,
 			path: path,
 			msg: msg
 		});
@@ -52,46 +60,90 @@ var diffJson = function (dest, src) {
 };
 
 module.exports = function (grunt) {
-
-	// Please see the Grunt documentation for more information regarding task
-	// creation: http://gruntjs.com/creating-tasks
-
 	grunt.registerMultiTask('diff_json', 'Grunt task that compares json files.', function () {
 		// Merge task-specific and/or target-specific options with these defaults.
 		var options = this.options({
+			/**
+			 * Report options:
+			 * fatal:   log as an error. Stops task even if called with --force.
+			 * error:   log as an error. Stops task if called without --force.
+			 * warn:    log as an error, but continue. 
+			 * notice:  log only.
+			 * verbose: log only in verbose mode.
+			 */
 			report: {
-				T: 'error',
-				E: 'notice',
-				N: 'warn',
-				D: 'error'
+				typeMismatch:	'error',	// Mismatching Type
+				edited:			'notice',	// Value edited (but has a same type)
+				obsolete:		'warn',		// Obsolete value in destination.
+				missing:		'error'		// Missing value in destionation.
 			}
 		});
-
+		
+		var warnings = 0;
+		
+		var safeReadJSON = function (filepath) {
+			try {
+				return grunt.file.readJSON(filepath);
+			}
+			catch (err) {
+				grunt.fail.fatal(err);
+			}
+		};
+		
 		// Iterate over all specified file groups.
-		this.files.forEach(function (f) {
-			// Concat specified files.
-			var src = f.src.filter(function (filepath) {
+		this.files.forEach(function (group) {
+			if (!grunt.file.exists(group.dest)) {
+				// Destination path is required.
+				grunt.fail.warn('Template file "' + group.dest + '" not found.');
+				return;
+			}
+
+			var template = safeReadJSON(group.dest);
+
+			var src = group.src.filter(function (filepath) {
 				// Warn on and remove invalid source files (if nonull was set).
 				if (!grunt.file.exists(filepath)) {
 					grunt.log.warn('Source file "' + filepath + '" not found.');
 					return false;
-				} else {
+				}
+				else {
 					return true;
 				}
-			}).map(function (filepath) {
-				// Read file source.
-				return grunt.file.read(filepath);
-			}).join(grunt.util.normalizelf(options.separator));
+			})
+			.map(function (filepath) {
+				var subject = safeReadJSON(filepath);
+				grunt.log.subhead('Comparing file: ' + group.dest + ' -> ' + filepath);
 
-			// Handle options.
-			src += options.punctuation;
-
-			// Write the destination file.
-			grunt.file.write(f.dest, src);
-
-			// Print a success message.
-			grunt.log.writeln('File "' + f.dest + '" created.');
+				var diffReport = diffJSON(template, subject);
+				
+				// Report diffs based on type and corresponding option.
+				diffReport.forEach(function (line) {
+					var str = line.path + ' ' + line.msg;
+					switch (options.report[line.kind]) {
+						case 'fatal':
+							grunt.log.error(str).error('Fatal error. Aborting...');
+							grunt.fail.fatal('Diff test failed.');
+							break;
+						case 'error':
+							grunt.log.error(str).error('Error. Aborting...');
+							grunt.fail.warn('Diff test failed.');
+							break;
+						case 'warn':
+							grunt.log.error(str);
+							warnings += 1;
+							break;
+						case 'notice':
+							grunt.log.ok(str);
+							break;
+						case 'verbose':
+							grunt.log.verbose.ok(str);
+							break;
+					}
+				});
+			});
 		});
+
+		grunt.log.header('Diff test of ' + this.target + ' succeeded with ' + warnings + ' warnings.');
 	});
 
 };
