@@ -15,12 +15,7 @@
   "bugs": {
     "url": "https://github.com/openknowl/grunt-diff-json/issues"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/openknowl/grunt-diff-json/blob/master/LICENSE-MIT"
-    }
-  ],
+  "license": "MIT",
   "engines": {
     "node": ">= 0.10.0"
   },
