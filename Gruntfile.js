@@ -30,21 +30,17 @@ module.exports = function(grunt) {
 
     // Configuration to be run (and then tested).
     diffJSON: {
-      default_options: {
-        options: {
-        },
-        files: {
-          'tmp/default_options': ['test/fixtures/testing', 'test/fixtures/123']
-        }
+      success: {
+        dest: 'test/json/template.json',
+        src: 'test/json/success.json',
       },
-      custom_options: {
-        options: {
-          separator: ': ',
-          punctuation: ' !!!'
-        },
-        files: {
-          'tmp/custom_options': ['test/fixtures/testing', 'test/fixtures/123']
-        }
+      warn: {
+        dest: 'test/json/template.json',
+        src: 'test/json/success.json',
+      },
+      fatal: {
+        dest: 'test/json/template.json',
+        src: 'test/json/success.json',
       }
     },
 
