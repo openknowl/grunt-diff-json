@@ -11,39 +11,44 @@
 var deepDiff = require('deep-diff');
 
 var diffJson = function (dest, src) {
-	var diff = deepDiff(src, dest);
+	var differences = deepDiff(src, dest);
+	var report = [];
 
-	if (typeof diff !== 'undefined') {
-		for (var i = 0; i < diff.length; i++) {
-			var path = diff[i].path.join('.');
-			switch (diff[i].kind) {
-				case 'E':
-					if (typeof diff[i].rhs !== typeof diff[i].lhs) {
-						grunt.log.error('Wrong Type [' + path + ']');
-						grunt.fail.warn('config test failed.');
-					}
-
-					else {
-						grunt.log.writeln('[' + path + '] "' + diff[i].lhs + '" -> "' + diff[i].rhs + '"');
-					}
-
-					break;
-
-				case 'N':
-					grunt.log.error('Obsolete [' + path + ']');
-					warn++;
-					break;
-
-				case 'D':
-					grunt.log.error('Missing [' + path + '] (example value : "' + diff[i].lhs + '") Aborting.');
-					grunt.fail.warn('config test failed.');
-					break;
-			}
+	// Reformat this data.
+	differences.forEach(function (diff) {
+		// Override type for convenience.
+		if ((typeof diff.rhs) !== (typeof diff.lhs)) {
+			diff.kind = 'T';
 		}
-	}
-
-	grunt.log.writeln('Config test succeeded with ' + warn + ' warning(s).');
-	return true;
+		
+		var path = '[' + diff.path.join('.') + ']';
+		var msg;
+		
+		// Format string.
+		switch (diff.kind) {
+			case 'E':
+				msg = '"' + diff.lhs + '" -> "' + diff.rhs + '"';
+				break;
+			case 'T': 
+				msg = 'Mismatching type: ' + '"' + (typeof diff.lhs) + '" -> "' + (typeof diff.rhs) + '"';
+				break;
+			case 'N':
+				msg = 'Obsolete: ' + '(current value: "' + diff.rhs + '")';
+				break;
+			case 'D':
+				msg = 'Missing: ' + '(example value : "' + diff[i].lhs + '")';
+				break;
+		}
+		
+		// Aggregate to report array.
+		report.push({
+			kind: diff.kind,
+			path: path,
+			msg: msg
+		});
+	});
+	
+	return report;
 };
 
 module.exports = function (grunt) {
@@ -54,8 +59,12 @@ module.exports = function (grunt) {
 	grunt.registerMultiTask('diff_json', 'Grunt task that compares two json files.', function () {
 		// Merge task-specific and/or target-specific options with these defaults.
 		var options = this.options({
-			punctuation: '.',
-			separator: ', '
+			report: {
+				T: 'error',
+				E: 'notice',
+				N: 'warn',
+				D: 'error'
+			}
 		});
 
 		// Iterate over all specified file groups.
