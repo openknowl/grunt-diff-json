@@ -8,6 +8,44 @@
 
 'use strict';
 
+var deepDiff = require('deep-diff');
+
+var diffJson = function (dest, src) {
+	var diff = deepDiff(src, dest);
+
+	if (typeof diff !== 'undefined') {
+		for (var i = 0; i < diff.length; i++) {
+			var path = diff[i].path.join('.');
+			switch (diff[i].kind) {
+				case 'E':
+					if (typeof diff[i].rhs !== typeof diff[i].lhs) {
+						grunt.log.error('Wrong Type [' + path + ']');
+						grunt.fail.warn('config test failed.');
+					}
+
+					else {
+						grunt.log.writeln('[' + path + '] "' + diff[i].lhs + '" -> "' + diff[i].rhs + '"');
+					}
+
+					break;
+
+				case 'N':
+					grunt.log.error('Obsolete [' + path + ']');
+					warn++;
+					break;
+
+				case 'D':
+					grunt.log.error('Missing [' + path + '] (example value : "' + diff[i].lhs + '") Aborting.');
+					grunt.fail.warn('config test failed.');
+					break;
+			}
+		}
+	}
+
+	grunt.log.writeln('Config test succeeded with ' + warn + ' warning(s).');
+	return true;
+};
+
 module.exports = function (grunt) {
 
 	// Please see the Grunt documentation for more information regarding task
