@@ -56,7 +56,7 @@ module.exports = function (grunt) {
 	// Please see the Grunt documentation for more information regarding task
 	// creation: http://gruntjs.com/creating-tasks
 
-	grunt.registerMultiTask('diff_json', 'Grunt task that compares two json files.', function () {
+	grunt.registerMultiTask('diff_json', 'Grunt task that compares json files.', function () {
 		// Merge task-specific and/or target-specific options with these defaults.
 		var options = this.options({
 			report: {

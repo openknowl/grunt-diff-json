@@ -1,6 +1,6 @@
 # grunt-diff-json
 
-> Grunt task that compares two json files.
+> Grunt task that compares json files.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.5`
