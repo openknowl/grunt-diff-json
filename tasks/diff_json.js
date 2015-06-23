@@ -93,7 +93,7 @@ module.exports = function (grunt) {
 						return eval('(' + raw + ')');
 					case 'JSON.parse':
 					default:
-						return grunt.file.read(filepath);
+						return grunt.file.readJSON(filepath);
 				}
 			}
 			catch (err) {
