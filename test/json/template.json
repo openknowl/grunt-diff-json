@@ -1,0 +1,8 @@
+{
+	"same": "same",
+	"edited": "original",
+	"typeMismatch": {
+		"this": "is an object"
+	},
+	"missing": "I may be lost!"
+}

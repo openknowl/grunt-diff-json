@@ -23,11 +23,6 @@ module.exports = function(grunt) {
       }
     },
 
-    // Before generating any new files, remove any previously-created files.
-    clean: {
-      tests: ['tmp']
-    },
-
     // Configuration to be run (and then tested).
     diffJSON: {
       success: {
@@ -35,12 +30,21 @@ module.exports = function(grunt) {
         src: 'test/json/success.json',
       },
       warn: {
+        options: {
+          report: {
+            typeMismatch: 'warn',
+            edited: 'notice',
+            oboslete: 'warn',
+            missing: 'error'
+          },
+          parseFunction: 'eval'
+        },
         dest: 'test/json/template.json',
-        src: 'test/json/success.json',
+        src: 'test/json/warn.json',
       },
-      fatal: {
+      error: {
         dest: 'test/json/template.json',
-        src: 'test/json/success.json',
+        src: 'test/json/error.json',
       }
     },
 
@@ -56,12 +60,14 @@ module.exports = function(grunt) {
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-nodeunit');
 
   // Whenever the "test" task is run, first clean the "tmp" dir, then run this
   // plugin's task(s), then test the result.
-  grunt.registerTask('test', ['clean', 'diffJSON', 'nodeunit']);
+  grunt.registerTask('test', [
+    'diffJSON:success',
+    'diffJSON:warn',
+    'diffJSON:error',
+  ]);
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['jshint', 'test']);

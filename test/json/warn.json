@@ -1,0 +1,7 @@
+{
+	"same": "same",
+	"edited": "new too",
+	"typeMismatch": false, // is not an object.
+	"missing": "I'm not lost!",
+	"obosolete": "Where am I?"
+}

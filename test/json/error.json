@@ -1,8 +1,7 @@
 {
 	"same": "same",
-	"edited": "new",
+	"edited": "new new",
 	"typeMismatch": {
 		"this": "is still an object"
-	},
-	"missing": "I'm here!"
+	}
 }
