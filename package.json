@@ -1,7 +1,7 @@
 {
   "name": "grunt-diff-json",
   "description": "Grunt task that compares json files.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/openknowl/grunt-diff-json",
   "author": {
     "name": "openknowl",
