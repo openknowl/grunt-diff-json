@@ -78,14 +78,23 @@ module.exports = function (grunt) {
 				edited:			'notice',	// Value edited (but has a same type)
 				obsolete:		'warn',		// Obsolete value in destination.
 				missing:		'error'		// Missing value in destionation.
-			}
+			},
+			
+			parseFunction: 'JSON.parse'
 		});
 		
 		var warnings = 0;
 		
 		var safeReadJSON = function (filepath) {
 			try {
-				return grunt.file.readJSON(filepath);
+				switch (options.parseFunction) {
+					case 'eval':
+						var raw = grunt.file.read(filepath);
+						return eval('(' + raw + ')');
+					case 'JSON.parse':
+					default:
+						return grunt.file.read(filepath);
+				}
 			}
 			catch (err) {
 				grunt.fail.fatal(err);
