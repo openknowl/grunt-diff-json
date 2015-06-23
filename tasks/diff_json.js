@@ -21,6 +21,11 @@ var diffJSON = function (template, subject) {
 		D: 'missing'
 	};
 
+	// Handle empty.
+	if (!(differences instanceof Array) || differences.length === 0) {
+		return report;
+	}
+
 	// Reformat this data.
 	differences.forEach(function (diff) {
 		var path = '[' + diff.path.join('.') + ']';
