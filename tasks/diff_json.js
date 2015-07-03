@@ -128,7 +128,7 @@ module.exports = function (grunt) {
 			})
 			.map(function (filepath) {
 				var subject = safeReadJSON(filepath);
-				grunt.log.subhead('Comparing file: ' + group.dest + ' -> ' + filepath);
+				grunt.log.writeln('Comparing file: ' + group.dest + ' -> ' + filepath);
 
 				var diffReport = diffJSON(template, subject);
 				
@@ -159,7 +159,7 @@ module.exports = function (grunt) {
 			});
 		});
 
-		grunt.log.header('Diff test of "' + this.target + '" succeeded with ' + warnings + ' warning(s).');
+		grunt.log.subhead('Diff test of "' + this.target + '" succeeded with ' + warnings + ' warning(s).');
 	});
 
 };
