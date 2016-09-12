@@ -1,3 +1,7 @@
+## DEPRECATED: THIS PROJECT IS NO LONGER MAINTAINED.
+We are looking for new maintainers because we don't use Grunt anymore, sorry.
+Please leave a message if you're interested in maintaining.
+
 # grunt-diff-json
 
 > Grunt task that compares json files.
